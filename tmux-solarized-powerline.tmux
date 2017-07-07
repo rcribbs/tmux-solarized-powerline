@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function get_opt() {
    local option=$1
@@ -76,30 +78,37 @@ set_win_opt "window-status-activity-attr" "none"
 set_win_opt "window-status-separator" ""
 
 set_opt "@prefix_highlight_fg" "black"
-set_opt "@prefix_highlight_bg" "brightred"
+set_opt "@prefix_highlight_bg" "cyan"
 set_opt "@prefix_highlight_copy_mode_attr" "fg=black,bg=brightred"
 set_opt "@prefix_highlight_output_prefix" "  "
 
-status_widgets=$(get "@solarized_powerline_widgets")
-time_format=$(get "@solarized_powerline_time_format" "%R")
-date_format=$(get "@solarized_powerline_date_format" "%d/%m/%Y")
-date_time_seperator=$(get "@solarized_powerline_date_time_seperator" "")
+set_opt "@solarized_powerline_prefix_active" \
+    "#[fg=blue,bg=magenta,nobold,nounderscore,noitalics] \
+#[fg=black,bg=magenta,nobold,nounderscore,noitalics] \
+$(tmux show-option -gvq "prefix") \
+#[fg=magenta,bg=brightcyan,nobold,nounderscore,noitalics]"
+set_opt "@solarized_powerline_prefix_inactive" \
+    "#[fg=blue,bg=brightcyan,nobold,nounderscore,noitalics] "
+prefix_string="#{?client_prefix,#{@solarized_powerline_prefix_active},\
+#{@solarized_powerline_prefix_inactive}}"
 
-set_opt"status-right" "#[fg=white,bg=black,nounderscore,noitalics]\
-  ${time_format} ${date_time_seperator} ${date_format} \
-  #[fg=visual_grey,bg=black]\
-  #[fg=visual_grey,bg=visual_grey]\
-  #[fg=white, bg=visual_grey]${status_widgets}\
-  #[fg=green,bg=visual_grey,nobold,nounderscore,noitalics]\
-  #[fg=black,bg=green,bold] #h #[fg=yellow, bg=green]\
-  #[fg=red,bg=yellow]"
-set_opt"status-left" "#[fg=visual_grey,bg=green,bold] #S \
-  #{prefix_highlight}#[fg=green,bg=visual_grey,nobold,nounderscore,noitalics]"
+status_widgets=$(get_opt "@solarized_powerline_widgets")
+time_format=$(get_opt "@solarized_powerline_time_format" "%R")
+date_format=$(get_opt "@solarized_powerline_date_format" "%d/%m/%Y")
+date_time_seperator=$(get_opt "@solarized_powerline_date_time_seperator" "")
 
-set_opt"window-status-format" "#[fg=black,bg=black,nobold,nounderscore,noitalics]\
-  #[fg=white,bg=black] #I  #W \
-  #[fg=black,bg=black,nobold,nounderscore,noitalics]"
-set_opt"window-status-current-format" \
-  "#[fg=black,bg=visual_grey,nobold,nounderscore,noitalics]\
-  #[fg=white,bg=visual_grey,nobold] #I  #W \
-  #[fg=visual_grey,bg=black,nobold,nounderscore,noitalics]"
+set_opt "status-right" "#[fg=brightcyan,bg=black,nounderscore,noitalics]\
+${time_format} ${date_time_seperator} ${date_format} \
+#[fg=brightcyan,bg=black]\
+#[fg=brightcyan,bg=brightcyan]\
+#[fg=black, bg=brightcyan]${status_widgets}\
+#[fg=blue,bg=brightcyan,nobold,nounderscore,noitalics] \
+#[fg=black,bg=blue,bold] #h  "
+
+set_opt "status-left" "#[fg=black,bg=blue,bold] #S $prefix_string"
+
+set_opt "window-status-format" ""
+
+set_opt "window-status-current-format" \
+    "#[fg=black,bg=brightcyan,nobold] #W \
+#[fg=brightcyan,bg=black,nobold,nounderscore,noitalics]"
